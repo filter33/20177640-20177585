@@ -1,61 +1,351 @@
 <!DOCTYPE html>
-<html lang="en"><!向搜索引擎表示该页面是html语言，并且语言为英文网站>
+
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="style.css">
-    <script src="./lib/d3.v5.min.js"></script>
-    <title>Tree</title>
+
+     <meta charset="UTF-8">
+
+     <title>紧凑树</title>
+
+     <style>
+
+          ::-webkit-scrollbar {
+
+               display: none;
+
+          }
+
+
+
+          html, body {
+
+               overflow: hidden;
+
+               margin: 0;
+
+          }
+
+     </style>
+
 </head>
 
 <body>
-    <div class="source-data">
-        <label for="data-area">请输入:</label>
-        <textarea id="data-area" rows="8" cols="36"></textarea>
-    </div>
-    <div class="tree-action">
-        <button id="btn-calculate">OK</button>
-    </div>
-    <div class="tree-group" id="tree-group">
-        <!-- tree -->
-    </div>
+
+     <div id="input_text">
+
+          <textarea id="intext" rows="20" cols="50" wrap="hard"></textarea>
+
+          <button id="go_and_change">转换</button>
+
+     </div>
+
+     <div id="mountNode"></div>
+
+     <script>/*Fixing iframe window.innerHeight 0 issue in Safari*/document.body.clientHeight;</script>
+
+     <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g6-3.1.1/build/g6.js"></script>
+
+     <script src="https://gw.alipayobjects.com/os/antv/assets/lib/jquery-3.2.1.min.js"></script>
+
+     <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.hierarchy-0.5.0/build/hierarchy.js"></script>
+
+     <script>
+
+          const go_and_change = document.getElementById('go_and_change');
+
+          go_and_change.onclick = () => {
+
+               var text = document.getElementById('intext').value;
+
+          
+
+               //var text = '导师：张三\n2016级博士生：天一、王二、吴五\n2015级硕士生：李四、王五、许六\n2016级硕士生：刘一、李二、李三\n2017级本科生：刘六、琪七、司四\n';
+
+               //var keyword = ['导师：', '博士生：', '硕士生：', '本科生：', '、'];//未用到
+
+               function point(the_id) {   //点对象的构造函数
+
+                    this.id = the_id;
+
+                    this.children = [];
+
+               }
+
+               var i = 0;
+
+               var heighpoint = 0;//新画布的高度位置
+
+               var j = 0;//作为在后面遍历数组用变量;
+
+               var k = 0;//作为在输出遍历数组用变量;
+
+               var regexp_teacher = /^导师：(.+)$/;//用于查找老师的正则表达式
+
+               var regexp_grade = /^(.+)：(.+)$/;//用于查找年级和学位的正则表达式
+
+               var studentstr = "";//学生的字符串(后用)
+
+               var data = [];//存储数据，之后转成JSON传送至绘图api
+
+               var blocks = text.split("\n\n");//第一次拆分，拆分出大块
+
+               for (j = 0; j < blocks.length; j++) {
+
+                    var lines = blocks[j].split('\n');//按行划分
+
+                    data.push(new point(regexp_teacher.exec(lines[0])[1]));//创建并返回一个老师节点压入data内(第0行)
+
+                    for (i = 1; i < lines.length; i++) {
+
+                         if (lines[i] === "") {
+
+                              break;
+
+                         }
+
+                         var p = new point(regexp_grade.exec(lines[i])[1]);
+
+                         data[j].children.push(p);//创建并返回一个学历节点压入老师节点内
+
+                         studentstr = regexp_grade.exec(lines[i])[2];//划分出学生字符串
+
+                         var students = studentstr.split('、');
+
+                         for (var student of students) {
+
+                              var stu = new point(student);
+
+                              data[j].children[i - 1].children.push(stu);//将学生节点压入学历节点内
+
+                         }
+
+                    }
+
+               }
+
+               /*          var f = {
+
+                              "id": "张三",
+
+                                   "children": [
+
+                                        {
+
+                                             "id": "2016级博士生",
+
+                                             "children": [
+
+                                                  { "id": "天一", "children": [] },
+
+                                                  { "id": "王二", "children": [] },
+
+                                                  { "id": "吴五", "children": [] }
+
+                                             ]
+
+                                        },
+
+                                        {
+
+                                             "id": "2015级硕士生",
+
+                                             "children": [
+
+                                                  { "id": "李四", "children": [] },
+
+                                                  { "id": "王五", "children": [] },
+
+                                                  { "id": "许六", "children": [] }
+
+                                             ]
+
+                                        },
+
+                                        {
+
+                                             "id": "2016级硕士生", "children": [
+
+                                                  { "id": "刘一", "children": [] },
+
+                                                  { "id": "李二", "children": [] },
+
+                                                  { "id": "李三", "children": [] }
+
+                                             ]
+
+                                        },
+
+                                        {
+
+                                             "id": "2017级本科生",
+
+                                             "children": [
+
+                                                  { "id": "刘六", "children": [] },
+
+                                                  { "id": "琪七", "children": [] },
+
+                                                  { "id": "司四", "children": [] }
+
+                                             ]
+
+                                        }
+
+                                   ]
+
+                         }*///经过处理后的数据格式
+
+               function t(data) {
+
+                    var graph = new G6.TreeGraph({
+
+                         container: 'mountNode',
+
+                         width: window.innerWidth / 2,//设置画布宽度为1/2屏幕
+
+                         height: window.innerHeight / 2,//设置画布高度为1/2屏幕
+
+                         pixelRatio: 2,
+
+                         modes: {
+
+                              default: [{
+
+                                   type: 'collapse-expand',
+
+                                   onChange: function onChange(item, collapsed) {
+
+                                        var data = item.get('model').data;
+
+                                        data.collapsed = collapsed;
+
+                                        return true;
+
+                                   }
+
+                              }, 'drag-canvas', 'zoom-canvas']
+
+                         },
+
+                         defaultNode: {
+
+                              size: 16,
+
+                              anchorPoints: [[0, 0.5], [1, 0.5]],
+
+                              style: {
+
+                                   fill: '#40a9ff',
+
+                                   stroke: '#096dd9'
+
+                              }
+
+                         },
+
+                         defaultEdge: {
+
+                              shape: 'cubic-horizontal',
+
+                              style: {
+
+                                   stroke: '#A3B1BF'
+
+                              }
+
+                         },
+
+                         layout: {
+
+                              type: 'compactBox',
+
+                              direction: 'LR',
+
+                              getId: function getId(d) {
+
+                                   return d.id;
+
+                              },
+
+                              getHeight: function getHeight() {
+
+                                   return 16;
+
+                              },
+
+                              getWidth: function getWidth() {
+
+                                   return 16;
+
+                              },
+
+                              getVGap: function getVGap() {
+
+                                   return 10;
+
+                              },
+
+                              getHGap: function getHGap() {
+
+                                   return 100;
+
+                              }
+
+                         }
+
+                    });
+
+
+
+                    graph.node(function (node) {
+
+                         return {
+
+                              size: 26,
+
+                              style: {
+
+                                   fill: '#40a9ff',
+
+                                   stroke: '#096dd9'
+
+                              },
+
+                              label: node.id,
+
+                              labelCfg: {
+
+                                   position: node.children && node.children.length > 0 ? 'left' : 'right'
+
+                              }
+
+                         };
+
+                    });
+
+
+
+                    graph.data(data);
+
+                    graph.render();
+
+                    graph.fitView();
+
+               };
+
+               //t(data[0]);
+
+               for (k = 0; k < blocks.length; k++) {
+
+                    t(data[k]);
+
+               }
+
+          }
+
+     </script>
+
 </body>
-<script src="./tree.js"></script>
-<script src="./psj.js"></script>
-<script>
-    window.onload = function () {
-        document.getElementById('btn-calculate').onclick = function () {
-            let data = document.getElementById('data-area').value
-            if (!data) {
-                return alert('Please Input Data')
-            }
 
-            console.info(data)
-            try {
-                let treeDataList = extractData(data)
-                console.info(treeDataList)
-                for (let i = 0; i < treeDataList.length; i++) {
-                    let div = document.createElement("div");
-                    let id = 'tree' + i
-
-                    div.id = id
-                    div.class = 'tree'
-                    document.getElementById('tree-group').appendChild(div)
-
-                    let treeData = parseTreeData(treeDataList[i])
-                    createTree(treeData, '#' + id)
-                }
-            } catch (err) {
-                console.error(err)
-                return alert('数据格式不正确，请检查')
-            }
-
-
-        }
-    }
-</script>
-<script>
-</script>
 </html>
