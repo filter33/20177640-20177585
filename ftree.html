@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"><!--向搜索引擎表示该页面是html语言，并且语言为英文网站 -->
 <head>
      <meta charset="UTF-8">
      <title>学术家族树</title>
@@ -27,8 +27,8 @@ background-attachment: fixed;">
      <script src="https://gw.alipayobjects.com/os/antv/assets/lib/jquery-3.2.1.min.js"></script>
      <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.hierarchy-0.5.0/build/hierarchy.js"></script>
      <script>
-          const go_and_change = document.getElementById('btn');
-          go_and_change.onclick = () => {
+          const btn = document.getElementById('btn');
+          btn.onclick = () => {
                var text = document.getElementById('intext').value;
                //var text = '导师：张三\n2016级博士生：天一、王二、吴五\n2015级硕士生：李四、王五、许六\n2016级硕士生：刘一、李二、李三\n2017级本科生：刘六、琪七、司四\n';
                //var keyword = ['导师：', '博士生：', '硕士生：', '本科生：', '、'];//未用到
@@ -62,7 +62,7 @@ background-attachment: fixed;">
                          }
                     }
                }
-               function t(data) {
+               function h(data) {
                     var graph = new G6.TreeGraph({
                          container: 'mountNode',
                          width: window.innerWidth / 2,//设置画布宽度为1/2屏幕
@@ -129,7 +129,7 @@ background-attachment: fixed;">
                     graph.render();
                     graph.fitView();
                };
-               //t(data[0]);
+               //h(data[0]);
                for (k = 0; k < blocks.length; k++) {
                     h(data[k]);//给它的函数命了个名为h，data为我们储存规格化后数据的数组，具体代码见上面链接
                }
