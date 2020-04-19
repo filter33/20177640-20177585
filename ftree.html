@@ -40,21 +40,21 @@ background-attachment: fixed;">
                var heighpoint = 0;//新画布的高度位置
                var j = 0;//作为在后面遍历数组用变量;
                var k = 0;//作为在输出遍历数组用变量;
-               var regexp_teacher = /^导师：(.+)$/;//用于查找老师的正则表达式
-               var regexp_grade = /^(.+)：(.+)$/;//用于查找年级和学位的正则表达式
+               var teacher = /^导师：(.+)$/;//用于查找老师的正则表达式
+               var grade = /^(.+)：(.+)$/;//用于查找年级和学位的正则表达式
                var studentstr = "";//学生的字符串(后用)
                var data = [];//存储数据，之后转成JSON传送至绘图api
                var blocks = text.split("\n\n");//第一次拆分，拆分出大块
                for (j = 0; j < blocks.length; j++) {
                     var lines = blocks[j].split('\n');//按行划分
-                    data.push(new point(regexp_teacher.exec(lines[0])[1]));//创建并返回一个老师节点压入data内(第0行)
+                    data.push(new point(teacher.exec(lines[0])[1]));//创建并返回一个老师节点压入data内(第0行)
                     for (i = 1; i < lines.length; i++) {
                          if (lines[i] === "") {
                               break;
                          }
-                         var p = new point(regexp_grade.exec(lines[i])[1]);
+                         var p = new point(grade.exec(lines[i])[1]);
                          data[j].children.push(p);//创建并返回一个学历节点压入老师节点内
-                         studentstr = regexp_grade.exec(lines[i])[2];//划分出学生字符串
+                         studentstr = grade.exec(lines[i])[2];//划分出学生字符串
                          var students = studentstr.split('、');
                          for (var student of students) {
                               var stu = new point(student);
