@@ -2,7 +2,7 @@
 
   就一个ftree.html(包括html+css+JavaScript)和图片h.jpg
 
-  使用浏览器打开就可以了
+  点击Clone or download—— Download ZIP ，然后直接打开ftree.html
 
 输入：
 
